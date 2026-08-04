@@ -95,7 +95,7 @@ function renderLogin() {
       <div class="auth-hero">
         <div class="hero-content">
           <div class="hero-brand">
-            <span class="brand-dot"></span> ExpenseTracker Pro
+            <img src="/favicon.svg" alt="ExpenseTracker Logo" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" /> ExpenseTracker Pro
           </div>
           <h1>Smart Financial <span>Intelligence</span></h1>
           <p>Take full control of your personal expenses with real-time analytics, automated categorization, and intelligent budget insights.</p>
@@ -175,7 +175,7 @@ function renderRegister() {
       <div class="auth-hero">
         <div class="hero-content">
           <div class="hero-brand">
-            <span class="brand-dot"></span> ExpenseTracker Pro
+            <img src="/favicon.svg" alt="ExpenseTracker Logo" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" /> ExpenseTracker Pro
           </div>
           <h1>Start Managing <span>Smarter Today</span></h1>
           <p>Join thousands of users who track, analyze, and optimize their daily spending effortlessly.</p>
@@ -263,7 +263,7 @@ async function renderDashboard() {
       <!-- Sidebar Navigation -->
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <div class="brand-icon">💎</div>
+          <div class="brand-icon"><img src="/favicon.svg" alt="Expense Tracker Logo" /></div>
           <div class="brand-text">Expense<span>Tracker</span></div>
         </div>
         <div class="sidebar-nav">

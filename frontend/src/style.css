@@ -528,15 +528,20 @@ input, select, textarea, button { font-family: inherit; }
   gap: 12px;
 }
 .sidebar-brand .brand-icon {
-  width: 40px; height: 40px;
+  width: 42px; height: 42px;
   border-radius: 12px;
-  background: var(--gradient-accent);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  color: #fff;
+  padding: 4px;
   box-shadow: 0 4px 12px var(--accent-glow);
+}
+.sidebar-brand .brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .sidebar-brand .brand-text {
   font-size: 1.2rem;

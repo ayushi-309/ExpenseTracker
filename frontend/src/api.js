@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 function getToken() {
   return localStorage.getItem('token');
@@ -56,6 +56,15 @@ export async function loginUser(email, password) {
   return data;
 }
 
+export async function updateUserProfile(profileData) {
+  const user = await request('/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
+  setUser(user);
+  return user;
+}
+
 export function logoutUser() {
   clearAuth();
 }
@@ -64,7 +73,7 @@ export function isLoggedIn() {
   return !!getToken();
 }
 
-export { getUser };
+export { getUser, setUser };
 
 // Expenses
 export async function getExpenses() {

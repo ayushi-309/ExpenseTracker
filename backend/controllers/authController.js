@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const User = require('../models/User');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -22,7 +22,7 @@ const register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
     const user = await User.create({ name, email, password: hashedPassword });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, monthlyBudget: user.monthlyBudget || 50000 } });
   } catch (error) {
     next(error);
   }
@@ -46,7 +46,7 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, monthlyBudget: user.monthlyBudget || 50000 } });
   } catch (error) {
     next(error);
   }
@@ -57,7 +57,7 @@ const login = async (req, res, next) => {
 // @access  Private
 const getCurrentUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user._id || req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -67,4 +67,30 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getCurrentUser };
+// @desc    Update user profile & budget
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const { name, monthlyBudget } = req.body;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (monthlyBudget != null) updateData.monthlyBudget = Number(monthlyBudget);
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({
+      id: updatedUser._id || updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      monthlyBudget: updatedUser.monthlyBudget,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, getCurrentUser, updateProfile };

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ExpenseFallback } = require('../config/inMemoryStore');
 
 const expenseSchema = new mongoose.Schema(
   {
@@ -12,4 +13,14 @@ const expenseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Expense', expenseSchema);
+const MongooseExpense = mongoose.model('Expense', expenseSchema);
+
+const ExpenseProxy = {
+  find: (query) => (mongoose.connection.readyState === 1 ? MongooseExpense.find(query) : ExpenseFallback.find(query)),
+  create: (data) => (mongoose.connection.readyState === 1 ? MongooseExpense.create(data) : ExpenseFallback.create(data)),
+  findOne: (query) => (mongoose.connection.readyState === 1 ? MongooseExpense.findOne(query) : ExpenseFallback.findOne(query)),
+  findOneAndUpdate: (query, update, options) => (mongoose.connection.readyState === 1 ? MongooseExpense.findOneAndUpdate(query, update, options) : ExpenseFallback.findOneAndUpdate(query, update, options)),
+  findOneAndDelete: (query) => (mongoose.connection.readyState === 1 ? MongooseExpense.findOneAndDelete(query) : ExpenseFallback.findOneAndDelete(query)),
+};
+
+module.exports = ExpenseProxy;

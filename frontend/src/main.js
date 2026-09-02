@@ -1,6 +1,6 @@
 import './style.css';
 import {
-  registerUser, loginUser, logoutUser, isLoggedIn, getUser,
+  registerUser, loginUser, logoutUser, isLoggedIn, getUser, setUser, updateUserProfile,
   getExpenses, createExpense, updateExpense, deleteExpense,
 } from './api.js';
 
@@ -73,6 +73,14 @@ function showToast(message, type = 'success') {
   }, 3200);
 }
 
+// Global Keyboard Shortcut: Press Escape to close overlay modals
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(modal => modal.remove());
+    closeMobileSidebar();
+  }
+});
+
 // ─── Router ─────────────────────────────────────────────────
 function navigate(page = 'dashboard') {
   if (page === 'login') {
@@ -98,19 +106,23 @@ function renderLogin() {
             <img src="/favicon.svg" alt="ExpenseTracker Logo" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" /> ExpenseTracker Pro
           </div>
           <h1>Smart Financial <span>Intelligence</span></h1>
-          <p>Take full control of your personal expenses with real-time analytics, automated categorization, and intelligent budget insights.</p>
+          <p>Take full control of your personal expenses with real-time analytics, automated budgeting, and spending insights.</p>
           <div class="hero-features">
             <div class="hero-feature">
               <div class="feature-icon">⚡</div>
               <div>Instant Expense Logging & Category Categorization</div>
             </div>
             <div class="hero-feature">
-              <div class="feature-icon">🔒</div>
-              <div>Bank-grade Security & End-to-End Encryption</div>
+              <div class="feature-icon">🎯</div>
+              <div>Automated Monthly Budget Goals & Exceeded Alerts</div>
             </div>
             <div class="hero-feature">
               <div class="feature-icon">📊</div>
-              <div>Interactive Analytics & Spending Breakdowns</div>
+              <div>Interactive SVG Analytics & Spending Breakdowns</div>
+            </div>
+            <div class="hero-feature">
+              <div class="feature-icon">📥</div>
+              <div>One-Click CSV Data Export & Date Filters</div>
             </div>
           </div>
         </div>
@@ -182,11 +194,11 @@ function renderRegister() {
           <div class="hero-features">
             <div class="hero-feature">
               <div class="feature-icon">🎯</div>
-              <div>Clear Visual Budgeting Goals</div>
+              <div>Clear Visual Budgeting Goals & Threshold Warnings</div>
             </div>
             <div class="hero-feature">
               <div class="feature-icon">📱</div>
-              <div>Fully Responsive on Desktop & Mobile</div>
+              <div>Fully Responsive on Desktop, Tablet & Mobile</div>
             </div>
           </div>
         </div>
@@ -249,9 +261,11 @@ function renderRegister() {
   });
 }
 
-// ─── Dashboard ──────────────────────────────────────────────
+// ─── Dashboard State ─────────────────────────────────────────
 let expenses = [];
 let activeCategoryFilter = 'ALL';
+let activeDateFilter = 'ALL';
+let activeSortOption = 'DATE_DESC';
 let searchQuery = '';
 
 async function renderDashboard() {
@@ -259,9 +273,10 @@ async function renderDashboard() {
   const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
 
   app.innerHTML = `
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="app-layout">
       <!-- Sidebar Navigation -->
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
           <div class="brand-icon"><img src="/favicon.svg" alt="Expense Tracker Logo" /></div>
           <div class="brand-text">Expense<span>Tracker</span></div>
@@ -273,6 +288,12 @@ async function renderDashboard() {
           </div>
           <div class="nav-item" id="nav-add-btn">
             <span class="nav-icon">➕</span> Add Expense
+          </div>
+          <div class="nav-item" id="nav-budget-btn">
+            <span class="nav-icon">🎯</span> Set Budget Goal
+          </div>
+          <div class="nav-item" id="nav-csv-btn">
+            <span class="nav-icon">📥</span> Export CSV
           </div>
         </div>
         <div class="sidebar-footer">
@@ -289,18 +310,25 @@ async function renderDashboard() {
       <!-- Main Content Area -->
       <main class="main-content">
         <header class="topbar">
-          <div class="topbar-left">
-            <h1>Dashboard Overview</h1>
-            <p>Welcome back, ${escapeHtml(user?.name || 'User')}. Here is your financial summary.</p>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Toggle Sidebar">☰</button>
+            <div class="topbar-left">
+              <h1>Dashboard Overview</h1>
+              <p>Welcome back, ${escapeHtml(user?.name || 'User')}. Here is your financial summary.</p>
+            </div>
           </div>
           <div class="topbar-actions">
             ${renderThemePicker()}
+            <button class="btn btn-csv btn-sm" id="export-csv-btn" title="Download Expenses as CSV">📥 CSV Export</button>
             <button class="btn btn-primary btn-sm" id="topbar-add-btn">+ Add Expense</button>
             <button class="btn btn-secondary btn-sm" id="logout-btn">Logout</button>
           </div>
         </header>
 
         <div class="page-content">
+          <!-- Monthly Budget Widget Card -->
+          <div class="budget-widget-card" id="budget-widget-card"></div>
+
           <!-- Stat Cards Row -->
           <div class="stats-row" id="stats-row"></div>
 
@@ -312,23 +340,39 @@ async function renderDashboard() {
                 <h3>📋 Expense Transactions</h3>
                 <span class="badge" id="expense-count-badge">0 items</span>
               </div>
+              
+              <!-- Filters and Controls Bar -->
               <div class="filters-bar">
                 <div class="search-input">
                   <input type="text" id="search-box" placeholder="Search expenses..." value="${escapeHtml(searchQuery)}" />
                 </div>
-                <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;" id="category-filters">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                  <select class="select-input" id="date-filter-select" title="Filter by Date Range">
+                    <option value="ALL" ${activeDateFilter === 'ALL' ? 'selected' : ''}>All Time</option>
+                    <option value="THIS_MONTH" ${activeDateFilter === 'THIS_MONTH' ? 'selected' : ''}>This Month</option>
+                    <option value="LAST_30" ${activeDateFilter === 'LAST_30' ? 'selected' : ''}>Last 30 Days</option>
+                    <option value="THIS_YEAR" ${activeDateFilter === 'THIS_YEAR' ? 'selected' : ''}>This Year</option>
+                  </select>
+                  <select class="select-input" id="sort-select" title="Sort Transactions">
+                    <option value="DATE_DESC" ${activeSortOption === 'DATE_DESC' ? 'selected' : ''}>Date (Newest)</option>
+                    <option value="DATE_ASC" ${activeSortOption === 'DATE_ASC' ? 'selected' : ''}>Date (Oldest)</option>
+                    <option value="AMOUNT_DESC" ${activeSortOption === 'AMOUNT_DESC' ? 'selected' : ''}>Amount (High to Low)</option>
+                    <option value="AMOUNT_ASC" ${activeSortOption === 'AMOUNT_ASC' ? 'selected' : ''}>Amount (Low to High)</option>
+                  </select>
                 </div>
               </div>
+              <div style="padding:12px 24px; border-bottom:1px solid var(--border-subtle); display:flex; gap:6px; overflow-x:auto;" id="category-filters"></div>
+              
               <div id="expenses-table-container"></div>
             </div>
 
-            <!-- Side Category Breakdown Card -->
+            <!-- Side Visual Analytics Card -->
             <div class="content-card">
               <div class="card-header">
-                <h3>📊 Category Breakdown</h3>
+                <h3>📊 Visual Analytics</h3>
               </div>
-              <div class="category-breakdown" id="category-breakdown">
-              </div>
+              <div class="chart-card-body" id="chart-card-body"></div>
+              <div class="category-breakdown" id="category-breakdown"></div>
             </div>
           </div>
         </div>
@@ -337,26 +381,65 @@ async function renderDashboard() {
   `;
 
   bindThemePickerEvents();
+  bindMobileSidebarEvents();
+
   document.getElementById('logout-btn').addEventListener('click', () => {
     logoutUser();
     navigate('login');
     showToast('Logged out successfully', 'info');
   });
   document.getElementById('topbar-add-btn').addEventListener('click', () => openExpenseModal());
-  document.getElementById('nav-add-btn').addEventListener('click', () => openExpenseModal());
+  document.getElementById('nav-add-btn').addEventListener('click', () => { closeMobileSidebar(); openExpenseModal(); });
+  document.getElementById('nav-budget-btn').addEventListener('click', () => { closeMobileSidebar(); openBudgetModal(); });
+  document.getElementById('nav-csv-btn').addEventListener('click', () => { closeMobileSidebar(); exportExpensesToCSV(); });
+  document.getElementById('export-csv-btn').addEventListener('click', () => exportExpensesToCSV());
   
   const searchInput = document.getElementById('search-box');
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase();
+    renderFilteredTable();
+    renderCategoryBreakdown();
+  });
+
+  document.getElementById('date-filter-select').addEventListener('change', (e) => {
+    activeDateFilter = e.target.value;
+    renderFilteredTable();
+    renderCategoryBreakdown();
+  });
+
+  document.getElementById('sort-select').addEventListener('change', (e) => {
+    activeSortOption = e.target.value;
     renderFilteredTable();
   });
 
   await loadExpenses();
 }
 
+function bindMobileSidebarEvents() {
+  const btn = document.getElementById('mobile-menu-btn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  if (btn && sidebar && overlay) {
+    btn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+    overlay.addEventListener('click', () => closeMobileSidebar());
+  }
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+}
+
 async function loadExpenses() {
   try {
     expenses = await getExpenses();
+    renderBudgetWidget();
     renderStats();
     renderCategoryFilters();
     renderFilteredTable();
@@ -366,37 +449,143 @@ async function loadExpenses() {
   }
 }
 
+// ─── Monthly Budget Widget ──────────────────────────────────
+function renderBudgetWidget() {
+  const container = document.getElementById('budget-widget-card');
+  if (!container) return;
+
+  const user = getUser();
+  const limit = user?.monthlyBudget || 50000;
+
+  // Calculate total spent in current calendar month
+  const now = new Date();
+  const currentMonthTotal = expenses.reduce((sum, exp) => {
+    const d = new Date(exp.date);
+    if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+      return sum + Number(exp.amount || 0);
+    }
+    return sum;
+  }, 0);
+
+  const pct = limit > 0 ? Math.min(100, Math.round((currentMonthTotal / limit) * 100)) : 0;
+  
+  let statusClass = 'safe';
+  let statusText = 'On Track';
+  if (currentMonthTotal > limit) {
+    statusClass = 'exceeded';
+    statusText = 'Budget Exceeded!';
+  } else if (pct >= 80) {
+    statusClass = 'warning';
+    statusText = 'Near Limit';
+  }
+
+  container.innerHTML = `
+    <div class="budget-header">
+      <div class="budget-title">
+        <span>🎯 Monthly Spending Target</span>
+        <span class="budget-badge ${statusClass}">${statusText} (${pct}%)</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="edit-budget-btn">⚙️ Adjust Budget</button>
+    </div>
+    <div class="budget-values">
+      <span class="budget-spent">₹${currentMonthTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })} <span style="font-size:0.85rem; font-weight:500; color:var(--text-muted);">spent this month</span></span>
+      <span class="budget-limit">Goal: ₹${limit.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
+    </div>
+    <div class="budget-progress-track">
+      <div class="budget-progress-fill ${statusClass}" style="width: ${pct}%"></div>
+    </div>
+  `;
+
+  document.getElementById('edit-budget-btn')?.addEventListener('click', () => openBudgetModal());
+}
+
+function openBudgetModal() {
+  const user = getUser();
+  const currentLimit = user?.monthlyBudget || 50000;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h2>🎯 Adjust Monthly Budget Limit</h2>
+        <button class="modal-close" id="budget-close-btn">&times;</button>
+      </div>
+      <form id="budget-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="budget-amount-input">Monthly Spending Target (₹)</label>
+            <input type="number" id="budget-amount-input" value="${currentLimit}" min="1000" step="500" required />
+            <span style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">Setting a target helps you track spending thresholds and warnings.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="budget-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="budget-save-btn">Save Budget Target</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.getElementById('budget-close-btn').addEventListener('click', close);
+  document.getElementById('budget-cancel-btn').addEventListener('click', close);
+
+  document.getElementById('budget-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newLimit = parseFloat(document.getElementById('budget-amount-input').value);
+    const btn = document.getElementById('budget-save-btn');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> Saving...`;
+
+    try {
+      await updateUserProfile({ monthlyBudget: newLimit });
+      showToast('Monthly budget updated!', 'success');
+      close();
+      renderBudgetWidget();
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Save Budget Target';
+    }
+  });
+}
+
+// ─── Stats Row ───────────────────────────────────────────────
 function renderStats() {
-  const total = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-  const count = expenses.length;
+  const filtered = getFilteredExpenses();
+  const total = filtered.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const count = filtered.length;
   const avg = count > 0 ? (total / count) : 0;
-  const categories = new Set(expenses.map(e => e.category).filter(Boolean));
+  const categories = new Set(filtered.map(e => e.category).filter(Boolean));
 
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
       <div class="stat-header">
-        <span class="stat-label">Total Expenses</span>
+        <span class="stat-label">Total Filtered Spending</span>
         <div class="stat-icon purple">💰</div>
       </div>
       <div class="stat-value">₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
     </div>
     <div class="stat-card">
       <div class="stat-header">
-        <span class="stat-label">Total Items</span>
+        <span class="stat-label">Transactions Count</span>
         <div class="stat-icon blue">📦</div>
       </div>
       <div class="stat-value">${count}</div>
     </div>
     <div class="stat-card">
       <div class="stat-header">
-        <span class="stat-label">Average Spending</span>
+        <span class="stat-label">Average Transaction</span>
         <div class="stat-icon green">📈</div>
       </div>
       <div class="stat-value">₹${avg.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
     </div>
     <div class="stat-card">
       <div class="stat-header">
-        <span class="stat-label">Categories Used</span>
+        <span class="stat-label">Active Categories</span>
         <div class="stat-icon amber">🏷️</div>
       </div>
       <div class="stat-value">${categories.size}</div>
@@ -404,9 +593,11 @@ function renderStats() {
   `;
 }
 
+// ─── Filters & Sorting Logic ───────────────────────────────
 function renderCategoryFilters() {
   const categories = ['ALL', 'Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Health', 'Education', 'Other'];
   const container = document.getElementById('category-filters');
+  if (!container) return;
   container.innerHTML = categories.map(cat => `
     <button class="filter-chip ${activeCategoryFilter === cat ? 'active' : ''}" data-cat="${cat}">
       ${cat}
@@ -418,18 +609,44 @@ function renderCategoryFilters() {
       activeCategoryFilter = chip.dataset.cat;
       renderCategoryFilters();
       renderFilteredTable();
+      renderStats();
+      renderCategoryBreakdown();
     });
   });
 }
 
 function getFilteredExpenses() {
+  const now = new Date();
   return expenses.filter(exp => {
+    // 1. Category Filter
     const matchesCategory = activeCategoryFilter === 'ALL' || exp.category === activeCategoryFilter;
+
+    // 2. Search Query
     const matchesSearch = !searchQuery || 
       exp.title?.toLowerCase().includes(searchQuery) || 
       exp.description?.toLowerCase().includes(searchQuery) ||
       exp.category?.toLowerCase().includes(searchQuery);
-    return matchesCategory && matchesSearch;
+
+    // 3. Date Range Filter
+    let matchesDate = true;
+    const expDate = new Date(exp.date);
+    if (activeDateFilter === 'THIS_MONTH') {
+      matchesDate = expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear();
+    } else if (activeDateFilter === 'LAST_30') {
+      const diffTime = now - expDate;
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      matchesDate = diffDays <= 30 && diffDays >= 0;
+    } else if (activeDateFilter === 'THIS_YEAR') {
+      matchesDate = expDate.getFullYear() === now.getFullYear();
+    }
+
+    return matchesCategory && matchesSearch && matchesDate;
+  }).sort((a, b) => {
+    if (activeSortOption === 'DATE_DESC') return new Date(b.date) - new Date(a.date);
+    if (activeSortOption === 'DATE_ASC') return new Date(a.date) - new Date(b.date);
+    if (activeSortOption === 'AMOUNT_DESC') return Number(b.amount) - Number(a.amount);
+    if (activeSortOption === 'AMOUNT_ASC') return Number(a.amount) - Number(b.amount);
+    return 0;
   });
 }
 
@@ -443,7 +660,7 @@ function renderFilteredTable() {
       <div class="empty-state">
         <div class="empty-illustration">💳</div>
         <h3>No expenses found</h3>
-        <p>${expenses.length === 0 ? "You haven't recorded any expenses yet. Click below to add your first expense." : "No expenses match your search/filter criteria."}</p>
+        <p>${expenses.length === 0 ? "You haven't recorded any expenses yet. Click below to add your first expense." : "No expenses match your search or filter criteria."}</p>
         ${expenses.length === 0 ? `<button class="btn btn-primary" id="empty-add-btn">+ Add Expense Now</button>` : ''}
       </div>
     `;
@@ -503,16 +720,23 @@ function renderFilteredTable() {
   });
 }
 
+// ─── Visual Analytics & Category Breakdown ─────────────────
 function renderCategoryBreakdown() {
   const container = document.getElementById('category-breakdown');
-  if (expenses.length === 0) {
-    container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:32px 0;">No data to analyze</div>`;
+  const chartBody = document.getElementById('chart-card-body');
+  if (!container || !chartBody) return;
+
+  const filtered = getFilteredExpenses();
+
+  if (filtered.length === 0) {
+    chartBody.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:24px 0;">No chart data</div>`;
+    container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:24px 0;">No category data to display</div>`;
     return;
   }
 
   const totals = {};
   let totalSum = 0;
-  expenses.forEach(e => {
+  filtered.forEach(e => {
     const cat = e.category || 'Other';
     totals[cat] = (totals[cat] || 0) + Number(e.amount || 0);
     totalSum += Number(e.amount || 0);
@@ -520,13 +744,52 @@ function renderCategoryBreakdown() {
 
   const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
 
-  container.innerHTML = sorted.map(([cat, amount]) => {
+  // Color palette for SVG Doughnut segments
+  const colors = ['#6366f1', '#10b981', '#f59e0b', '#06b6d4', '#ec4899', '#8b5cf6', '#3b82f6', '#f43f5e'];
+  
+  // Render Interactive SVG Doughnut Chart
+  let cumulativePercent = 0;
+  const strokeDashArray = 2 * Math.PI * 80; // circumference for radius=80 (approx 502.65)
+
+  const chartSegments = sorted.map(([cat, amount], idx) => {
+    const pct = totalSum > 0 ? amount / totalSum : 0;
+    const strokeDashoffset = strokeDashArray * (1 - pct);
+    const rotation = cumulativePercent * 360;
+    cumulativePercent += pct;
+
+    return `
+      <circle cx="110" cy="110" r="80" 
+              fill="transparent" 
+              stroke="${colors[idx % colors.length]}" 
+              stroke-width="24"
+              stroke-dasharray="${strokeDashArray}" 
+              stroke-dashoffset="${strokeDashoffset}" 
+              style="transform: rotate(${rotation}deg); transform-origin: 110px 110px; transition: all 0.8s ease;"
+              title="${cat}: ₹${amount.toLocaleString('en-IN')}" />
+    `;
+  }).join('');
+
+  chartBody.innerHTML = `
+    <div class="chart-svg-wrapper">
+      <svg viewBox="0 0 220 220">
+        ${chartSegments}
+      </svg>
+      <div class="chart-center-info">
+        <div class="chart-center-amount">₹${totalSum.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+        <div class="chart-center-sub">Total Spent</div>
+      </div>
+    </div>
+  `;
+
+  // Render Category Progress Bars
+  container.innerHTML = sorted.map(([cat, amount], idx) => {
     const percentage = totalSum > 0 ? ((amount / totalSum) * 100).toFixed(1) : 0;
+    const catColor = colors[idx % colors.length];
     return `
       <div class="category-bar-item">
         <div class="cat-bar-label">${escapeHtml(cat)}</div>
         <div class="cat-bar-track">
-          <div class="cat-bar-fill" style="width: ${percentage}%"></div>
+          <div class="cat-bar-fill" style="width: ${percentage}%; background: ${catColor};"></div>
         </div>
         <div class="cat-bar-value">₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 0 })} (${percentage}%)</div>
       </div>
@@ -534,7 +797,37 @@ function renderCategoryBreakdown() {
   }).join('');
 }
 
-// ─── Expense Modal ──────────────────────────────────────────
+// ─── CSV Export Handler ──────────────────────────────────────
+function exportExpensesToCSV() {
+  const filtered = getFilteredExpenses();
+  if (filtered.length === 0) {
+    showToast('No expenses available to export!', 'error');
+    return;
+  }
+
+  const headers = ['ID', 'Title', 'Amount (INR)', 'Category', 'Date', 'Description'];
+  const rows = filtered.map(exp => [
+    `"${exp._id || ''}"`,
+    `"${(exp.title || '').replace(/"/g, '""')}"`,
+    exp.amount || 0,
+    `"${exp.category || 'Other'}"`,
+    `"${new Date(exp.date).toISOString().split('T')[0]}"`,
+    `"${(exp.description || '').replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Expenses_Export_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('Expenses exported to CSV successfully!', 'success');
+}
+
+// ─── Expense Modal (Add / Edit) ──────────────────────────────
 function openExpenseModal(existing = null) {
   const isEdit = !!existing;
   const overlay = document.createElement('div');
@@ -542,7 +835,7 @@ function openExpenseModal(existing = null) {
   overlay.innerHTML = `
     <div class="modal">
       <div class="modal-header">
-        <h2>${isEdit ? 'Edit Expense Record' : 'Add New Expense'}</h2>
+        <h2>${isEdit ? '✏️ Edit Expense Record' : '➕ Add New Expense'}</h2>
         <button class="modal-close" id="modal-close-btn">&times;</button>
       </div>
       <form id="expense-form">

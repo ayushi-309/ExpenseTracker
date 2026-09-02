@@ -30,6 +30,12 @@ async function request(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401) {
+      clearAuth();
+      if (window.location.hash !== '#login' && !endpoint.includes('/auth/login')) {
+        setTimeout(() => { window.location.reload(); }, 1500);
+      }
+    }
     throw new Error(data.message || 'Something went wrong');
   }
   return data;

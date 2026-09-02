@@ -12,9 +12,13 @@ const protect = async (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
-    if (!req.user) {
-      return res.status(401).json({ message: 'Not authorized, user not found' });
+    const userFound = await User.findById(decoded.id).select('-password');
+    if (!userFound) {
+      return res.status(401).json({ message: 'Session expired or user not found. Please log in again.' });
+    }
+    req.user = userFound;
+    if (!req.user._id && req.user.id) {
+      req.user._id = req.user.id;
     }
     next();
   } catch (err) {

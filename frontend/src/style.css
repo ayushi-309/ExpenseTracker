@@ -229,32 +229,45 @@ input, select, textarea, button { font-family: inherit; }
    THEME SWITCHER CONTROL
    ═══════════════════════════════════════════ */
 .theme-picker {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: var(--bg-input);
-  padding: 4px;
+  padding: 4px 6px;
   border-radius: 9999px;
   border: 1px solid var(--border);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+.theme-picker:hover {
+  border-color: var(--border-hover);
 }
 .theme-btn {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
-  transition: all 0.2s;
+  font-size: 0.76rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 .theme-btn:hover { transform: scale(1.15); }
-.theme-btn.active { border-color: var(--text-primary); transform: scale(1.1); box-shadow: 0 0 10px var(--accent-glow); }
+.theme-btn.active { 
+  border-color: var(--text-primary); 
+  transform: scale(1.12); 
+  box-shadow: 0 0 10px var(--accent-glow); 
+}
 
 .theme-btn[data-theme-val="dark"] { background: linear-gradient(135deg, #090d16, #6366f1); }
 .theme-btn[data-theme-val="emerald"] { background: linear-gradient(135deg, #041410, #10b981); }
-.theme-btn[data-theme-val="light"] { background: linear-gradient(135deg, #ffffff, #4f46e5); }
+.theme-btn[data-theme-val="light"] { 
+  background: linear-gradient(135deg, #ffffff, #4f46e5); 
+  border: 1px solid rgba(0,0,0,0.15);
+}
 .theme-btn[data-theme-val="sapphire"] { background: linear-gradient(135deg, #060b19, #0284c7); }
 
 /* ═══════════════════════════════════════════
@@ -648,24 +661,121 @@ input, select, textarea, button { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 36px;
+  gap: 16px;
+  padding: 16px 36px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-glass);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
   z-index: 50;
+  transition: all 0.3s ease;
 }
-.topbar-left h1 {
-  font-size: 1.4rem;
+
+.topbar-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.topbar-brand-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.topbar-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-title {
+  font-size: 1.35rem;
   font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
 }
-.topbar-left p {
+
+.topbar-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--accent-glow);
+  color: var(--accent-light);
+  border: 1px solid var(--border);
+}
+
+.topbar-subtitle {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
 }
-.topbar-actions { display: flex; align-items: center; gap: 14px; }
+
+.user-highlight {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.topbar-utility {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.topbar-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar-actions .btn .btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.sidebar-close-btn {
+  display: none;
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+.sidebar-close-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
 
 .page-content {
   padding: 32px 36px;

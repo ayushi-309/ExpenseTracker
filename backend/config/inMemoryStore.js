@@ -5,8 +5,26 @@ const memoryExpenses = [];
 
 class UserFallback {
   static async findOne(query) {
+    if (!query) return null;
+    if (query.$or && Array.isArray(query.$or)) {
+      for (const cond of query.$or) {
+        if (cond.email) {
+          const found = memoryUsers.find(u => u.email && u.email.toLowerCase() === cond.email.toLowerCase());
+          if (found) return { ...found };
+        }
+        if (cond.phone) {
+          const found = memoryUsers.find(u => u.phone && u.phone === cond.phone);
+          if (found) return { ...found };
+        }
+      }
+      return null;
+    }
     if (query.email) {
-      const found = memoryUsers.find(u => u.email.toLowerCase() === query.email.toLowerCase());
+      const found = memoryUsers.find(u => u.email && u.email.toLowerCase() === query.email.toLowerCase());
+      return found ? { ...found } : null;
+    }
+    if (query.phone) {
+      const found = memoryUsers.find(u => u.phone && u.phone === query.phone);
       return found ? { ...found } : null;
     }
     return null;
@@ -18,7 +36,8 @@ class UserFallback {
       _id: id,
       id: id,
       name: data.name,
-      email: data.email.toLowerCase(),
+      email: (data.email || '').toLowerCase(),
+      phone: data.phone || '',
       password: data.password,
       monthlyBudget: data.monthlyBudget || 50000,
       createdAt: new Date(),

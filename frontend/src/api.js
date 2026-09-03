@@ -42,20 +42,50 @@ async function request(endpoint, options = {}) {
 }
 
 // Auth
-export async function registerUser(name, email, password) {
+export async function registerUser(name, email, phone, password) {
   const data = await request('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, phone, password }),
   });
   setToken(data.token);
   setUser(data.user);
   return data;
 }
 
-export async function loginUser(email, password) {
+export async function loginUser(emailOrIdentifier, phoneOrPassword, password) {
+  let email = null;
+  let phone = null;
+  let pass = password;
+
+  // Handle object signature: loginUser({ email, phone, password })
+  if (typeof emailOrIdentifier === 'object' && emailOrIdentifier !== null) {
+    email = emailOrIdentifier.email;
+    phone = emailOrIdentifier.phone;
+    pass = emailOrIdentifier.password;
+  }
+  // Handle 2-arg signature: loginUser(identifier, password)
+  else if (password === undefined && phoneOrPassword !== undefined) {
+    pass = phoneOrPassword;
+    const identifier = (emailOrIdentifier || '').trim();
+    if (identifier.includes('@')) {
+      email = identifier;
+    } else {
+      phone = identifier;
+    }
+  }
+  // Standard 3-arg signature: loginUser(email, phone, password)
+  else {
+    email = emailOrIdentifier;
+    phone = phoneOrPassword;
+  }
+
+  const payload = { password: pass };
+  if (email && String(email).trim()) payload.email = String(email).trim();
+  if (phone && String(phone).trim()) payload.phone = String(phone).trim();
+
   const data = await request('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   });
   setToken(data.token);
   setUser(data.user);

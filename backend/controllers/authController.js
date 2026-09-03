@@ -7,22 +7,46 @@ const User = require('../models/User');
 // @access  Public
 const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, phone, password } = req.body;
     // Simple validation
-    if (!name || !email || !password) {
+    if (!name || !email || !phone || !password) {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
+    // Check if user exists by email or phone
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.toLowerCase().trim() },
+        { phone: phone.trim() },
+      ],
+    });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      const isEmailMatch = existingUser.email === email.toLowerCase().trim();
+      return res.status(400).json({
+        message: isEmailMatch
+          ? 'An account with this email already exists'
+          : 'An account with this phone number already exists',
+      });
     }
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password: hashedPassword,
+    });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, monthlyBudget: user.monthlyBudget || 50000 } });
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        monthlyBudget: user.monthlyBudget || 50000,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -33,11 +57,26 @@ const register = async (req, res, next) => {
 // @access  Public
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide email and password' });
+    const { email, phone, password } = req.body;
+    if (!email && !phone) {
+      return res.status(400).json({ message: 'Please provide either email or phone number' });
     }
-    const user = await User.findOne({ email });
+    if (!password) {
+      return res.status(400).json({ message: 'Please provide password' });
+    }
+
+    const queryConditions = [];
+    if (email && email.trim()) {
+      queryConditions.push({ email: email.trim().toLowerCase() });
+    }
+    if (phone && phone.trim()) {
+      queryConditions.push({ phone: phone.trim() });
+    }
+
+    const user = await User.findOne(
+      queryConditions.length > 1 ? { $or: queryConditions } : queryConditions[0]
+    );
+
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -46,7 +85,16 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, monthlyBudget: user.monthlyBudget || 50000 } });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        monthlyBudget: user.monthlyBudget || 50000,
+      },
+    });
   } catch (error) {
     next(error);
   }

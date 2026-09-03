@@ -32,22 +32,45 @@ export function renderRegister(container, { onNavigate } = {}) {
         <div class="auth-form-container">
           <div class="form-header">
             <h2>Create Account</h2>
-            <p>Start tracking your expenses in seconds.</p>
+            <p>Start tracking and managing your expenses in seconds.</p>
           </div>
           <div id="auth-error" class="auth-error" style="display:none"></div>
-          <form id="register-form">
+          <form id="register-form" novalidate>
             <div class="form-group">
               <label for="reg-name">Full Name</label>
-              <input type="text" id="reg-name" placeholder="John Doe" required />
+              <div class="input-with-icon">
+                <input type="text" id="reg-name" placeholder="John Doe" autocomplete="name" required />
+                <span class="input-icon-prefix">👤</span>
+              </div>
             </div>
+
             <div class="form-group">
               <label for="reg-email">Email Address</label>
-              <input type="email" id="reg-email" placeholder="name@company.com" required />
+              <div class="input-with-icon">
+                <input type="email" id="reg-email" placeholder="name@company.com" autocomplete="email" required />
+                <span class="input-icon-prefix">✉️</span>
+              </div>
             </div>
+
+            <div class="form-group">
+              <label for="reg-phone">Phone Number</label>
+              <div class="input-with-icon">
+                <input type="tel" id="reg-phone" placeholder="e.g. 9876543210 or +1234567890" autocomplete="tel" required />
+                <span class="input-icon-prefix">📱</span>
+              </div>
+            </div>
+
             <div class="form-group">
               <label for="reg-password">Password</label>
-              <input type="password" id="reg-password" placeholder="Minimum 6 characters" minlength="6" required />
+              <div class="input-with-icon">
+                <input type="password" id="reg-password" placeholder="Minimum 6 characters" minlength="6" autocomplete="new-password" required />
+                <span class="input-icon-prefix">🔒</span>
+                <button type="button" class="password-toggle-btn" id="toggle-reg-password" aria-label="Toggle password visibility" title="Show/Hide Password">
+                  👁️
+                </button>
+              </div>
             </div>
+
             <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-btn">
               Create Account
             </button>
@@ -62,6 +85,17 @@ export function renderRegister(container, { onNavigate } = {}) {
 
   bindThemePickerEvents(container);
 
+  // Password visibility toggle
+  const togglePasswordBtn = container.querySelector('#toggle-reg-password');
+  const passwordInput = container.querySelector('#reg-password');
+  if (togglePasswordBtn && passwordInput) {
+    togglePasswordBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
+    });
+  }
+
   const goLogin = container.querySelector('#go-login');
   if (goLogin && onNavigate) {
     goLogin.addEventListener('click', (e) => {
@@ -73,18 +107,32 @@ export function renderRegister(container, { onNavigate } = {}) {
   const form = container.querySelector('#register-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = container.querySelector('#reg-name').value;
-    const email = container.querySelector('#reg-email').value;
+    const name = container.querySelector('#reg-name').value.trim();
+    const email = container.querySelector('#reg-email').value.trim();
+    const phone = container.querySelector('#reg-phone').value.trim();
     const password = container.querySelector('#reg-password').value;
     const errEl = container.querySelector('#auth-error');
     const btn = container.querySelector('#register-btn');
 
-    btn.innerHTML = `<span class="spinner"></span> Creating account...`;
-    btn.disabled = true;
     errEl.style.display = 'none';
 
+    if (!name || !email || !phone || !password) {
+      errEl.innerHTML = `⚠️ Please fill in all required fields.`;
+      errEl.style.display = 'flex';
+      return;
+    }
+
+    if (password.length < 6) {
+      errEl.innerHTML = `⚠️ Password must be at least 6 characters.`;
+      errEl.style.display = 'flex';
+      return;
+    }
+
+    btn.innerHTML = `<span class="spinner"></span> Creating account...`;
+    btn.disabled = true;
+
     try {
-      await registerUser(name, email, password);
+      await registerUser(name, email, phone, password);
       showToast('Account created successfully!', 'success');
       if (onNavigate) onNavigate('dashboard');
     } catch (err) {

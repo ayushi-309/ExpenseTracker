@@ -62,7 +62,7 @@ export function renderDashboard(container, { onNavigate } = {}) {
                 <div class="search-input">
                   <input type="text" id="search-box" placeholder="Search expenses..." value="${escapeHtml(searchQuery)}" />
                 </div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div class="filters-selects-row">
                   <select class="select-input" id="date-filter-select" title="Filter by Date Range">
                     <option value="ALL" ${activeDateFilter === 'ALL' ? 'selected' : ''}>All Time</option>
                     <option value="THIS_MONTH" ${activeDateFilter === 'THIS_MONTH' ? 'selected' : ''}>This Month</option>
@@ -77,7 +77,7 @@ export function renderDashboard(container, { onNavigate } = {}) {
                   </select>
                 </div>
               </div>
-              <div style="padding:12px 24px; border-bottom:1px solid var(--border-subtle); display:flex; gap:6px; overflow-x:auto;" id="category-filters"></div>
+              <div class="category-filters-container" id="category-filters"></div>
               
               <div id="expenses-table-container"></div>
             </div>

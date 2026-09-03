@@ -39,44 +39,47 @@ export function renderExpenseTable(
   }
 
   container.innerHTML = `
-    <table class="expense-table">
-      <thead>
-        <tr>
-          <th>Transaction</th>
-          <th>Amount</th>
-          <th>Category</th>
-          <th>Date</th>
-          <th style="text-align:right">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${filteredExpenses.map(exp => `
+    <div class="table-responsive">
+      <table class="expense-table">
+        <thead>
           <tr>
-            <td>
-              <span class="expense-title">${escapeHtml(exp.title)}</span>
-              <span class="expense-desc">${escapeHtml(exp.description || '')}</span>
-            </td>
-            <td>
-              <span class="expense-amount">-${formatCurrency(exp.amount)}</span>
-            </td>
-            <td>
-              <span class="category-pill" data-cat="${escapeHtml(exp.category || 'Other')}">
-                ${escapeHtml(exp.category || 'Other')}
-              </span>
-            </td>
-            <td>
-              <span class="expense-date">${formatDate(exp.date)}</span>
-            </td>
-            <td style="text-align:right">
-              <div class="row-actions" style="justify-content: flex-end;">
-                <button class="action-btn edit-btn" data-id="${exp._id}" title="Edit Expense">✏️</button>
-                <button class="action-btn delete delete-btn" data-id="${exp._id}" title="Delete Expense">🗑️</button>
-              </div>
-            </td>
+            <th>Transaction</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th style="text-align:right">Actions</th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          ${filteredExpenses.map(exp => `
+            <tr class="expense-row" data-id="${exp._id}">
+              <td class="col-transaction">
+                <span class="expense-title">${escapeHtml(exp.title)}</span>
+                ${exp.description ? `<span class="expense-desc">${escapeHtml(exp.description)}</span>` : ''}
+              </td>
+              <td class="col-amount">
+                <span class="expense-amount">-${formatCurrency(exp.amount)}</span>
+              </td>
+              <td class="col-category">
+                <span class="category-pill" data-cat="${escapeHtml(exp.category || 'Other')}">
+                  ${escapeHtml(exp.category || 'Other')}
+                </span>
+              </td>
+              <td class="col-date">
+                <span class="expense-date">${formatDate(exp.date)}</span>
+              </td>
+              <td class="col-actions">
+                <span class="mobile-date-label">📅 ${formatDate(exp.date)}</span>
+                <div class="row-actions">
+                  <button class="action-btn edit-btn" data-id="${exp._id}" title="Edit Expense" aria-label="Edit Expense">✏️</button>
+                  <button class="action-btn delete delete-btn" data-id="${exp._id}" title="Delete Expense" aria-label="Delete Expense">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
 
   if (onEditExpense) {

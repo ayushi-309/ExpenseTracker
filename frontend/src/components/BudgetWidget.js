@@ -47,7 +47,10 @@ export function renderBudgetWidget(container, allExpenses = [], user = null, { o
       <button class="btn btn-secondary btn-sm" id="edit-budget-btn">⚙️ Adjust Budget</button>
     </div>
     <div class="budget-values">
-      <span class="budget-spent">${formatCurrency(currentMonthTotal)} <span style="font-size:0.85rem; font-weight:500; color:var(--text-muted);">spent this month</span></span>
+      <div class="budget-spent-wrap">
+        <span class="budget-spent">${formatCurrency(currentMonthTotal)}</span>
+        <span class="budget-spent-label">spent this month</span>
+      </div>
       <span class="budget-limit">Goal: ${formatCurrency(limit, 0)}</span>
     </div>
     <div class="budget-progress-track">

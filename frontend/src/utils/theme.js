@@ -6,6 +6,10 @@ export const THEMES = [
   { id: 'dark', name: 'Dark Indigo', icon: '🌙' },
   { id: 'emerald', name: 'Emerald Luxury', icon: '🌿' },
   { id: 'sapphire', name: 'Sapphire Blue', icon: '💎' },
+  { id: 'amethyst', name: 'Amethyst Violet', icon: '🔮' },
+  { id: 'crimson', name: 'Crimson Sunset', icon: '🌹' },
+  { id: 'amber', name: 'Imperial Gold', icon: '👑' },
+  { id: 'nordic', name: 'Nordic Teal', icon: '❄️' },
   { id: 'light', name: 'Clean Light', icon: '☀️' }
 ];
 

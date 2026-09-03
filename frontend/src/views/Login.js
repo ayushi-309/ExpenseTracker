@@ -28,7 +28,7 @@ export function renderLogin(container, { onNavigate } = {}) {
     <div class="auth-page">
       ${heroHtml}
       <div class="auth-form-panel">
-        <div style="position: absolute; top: 24px; right: 24px;">
+        <div class="auth-theme-wrapper">
           ${renderThemePicker()}
         </div>
         <div class="auth-form-container">

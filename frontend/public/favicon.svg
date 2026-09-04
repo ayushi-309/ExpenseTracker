@@ -1,44 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
   <defs>
-    <style>
-      .outline { stroke: #1b494b; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
-      .fill-calc { fill: #97b5ba; }
-      .fill-screen { fill: #8adbf0; }
-      .fill-btn { fill: #eef6f7; }
-      .fill-coin { fill: #f3be3a; }
-      .fill-handle { fill: #9188c4; }
-      .text-dollar { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 800; fill: #1b494b; font-size: 32px; text-anchor: middle; dominant-baseline: central; }
-    </style>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+
+    <!-- Card Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Coin Gradient -->
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+
+    <!-- Glowing Drop Shadow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#6366f1" flood-opacity="0.4" />
+    </filter>
+
+    <filter id="coinShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
   </defs>
 
-  <!-- Calculator Body -->
-  <rect x="42" y="62" width="68" height="96" rx="10" class="fill-calc outline" />
+  <!-- Outer Rounded Shield / Badge -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bgGrad)" filter="url(#glow)" />
+  
+  <!-- Subtle Inner Border Highlight -->
+  <rect x="9" y="9" width="110" height="110" rx="27" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.3" />
 
-  <!-- Calculator Screen -->
-  <rect x="51" y="72" width="50" height="20" rx="4" class="fill-screen outline" />
+  <!-- Wallet / Vault Base Shape -->
+  <rect x="26" y="42" width="76" height="54" rx="14" fill="#ffffff" fill-opacity="0.95" />
+  <rect x="26" y="42" width="76" height="24" rx="12" fill="#f1f5f9" />
 
-  <!-- Buttons Grid -->
-  <!-- Row 1 -->
-  <rect x="51" y="100" width="10" height="10" rx="2" class="fill-btn outline" />
-  <rect x="66" y="100" width="10" height="10" rx="2" class="fill-btn outline" />
-  <rect x="81" y="100" width="10" height="10" rx="2" class="fill-btn outline" />
+  <!-- Credit / Spending Card Sticking Up -->
+  <rect x="36" y="24" width="56" height="34" rx="7" fill="url(#cardGrad)" transform="rotate(-6 64 41)" />
+  <rect x="42" y="32" width="16" height="8" rx="2" fill="#fde047" fill-opacity="0.9" transform="rotate(-6 64 41)" />
 
-  <!-- Row 2 -->
-  <rect x="51" y="115" width="10" height="10" rx="2" class="fill-btn outline" />
-  <rect x="66" y="115" width="10" height="10" rx="2" class="fill-btn outline" />
-  <rect x="81" y="115" width="10" height="10" rx="2" class="fill-btn outline" />
+  <!-- Wallet Front Flap -->
+  <path d="M 26 56 C 26 50, 32 46, 40 46 L 88 46 C 96 46, 102 50, 102 56 L 102 82 C 102 90, 96 96, 88 96 L 40 96 C 32 96, 26 90, 26 82 Z" fill="#ffffff" />
+  
+  <!-- Wallet Flap Line Accent -->
+  <path d="M 26 62 Q 64 74 102 62" fill="none" stroke="#e2e8f0" stroke-width="2" />
 
-  <!-- Row 3 -->
-  <rect x="51" y="130" width="10" height="10" rx="2" class="fill-btn outline" />
-  <rect x="66" y="130" width="10" height="10" rx="2" class="fill-btn outline" />
-  <rect x="81" y="130" width="10" height="22" rx="2" class="fill-btn outline" />
+  <!-- Sparkling Golden Coin on Flap -->
+  <circle cx="78" cy="74" r="13" fill="url(#coinGrad)" filter="url(#coinShadow)" />
+  <circle cx="78" cy="74" r="10.5" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="2 1" />
+  
+  <!-- Currency Symbol ₹ or $ -->
+  <text x="78" y="79" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="13" fill="#854d0e" text-anchor="middle">₹</text>
 
-  <!-- Magnifying Glass Handle Underneath -->
-  <path d="M 124 84 L 148 108" stroke="#1b494b" stroke-width="16" stroke-linecap="round" />
-  <path d="M 124 84 L 148 108" stroke="#9188c4" stroke-width="8" stroke-linecap="round" />
-
-  <!-- Dollar Coin Lens -->
-  <circle cx="108" cy="68" r="30" class="fill-coin outline" />
-  <!-- Dollar Symbol -->
-  <text x="108" y="70" class="text-dollar">$</text>
+  <!-- Growth Sparkle / Stars -->
+  <path d="M 98 22 Q 98 30 106 30 Q 98 30 98 38 Q 98 30 90 30 Q 98 30 98 22 Z" fill="#fde047" />
+  <circle cx="30" cy="34" r="2.5" fill="#38bdf8" />
 </svg>

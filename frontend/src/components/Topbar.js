@@ -15,15 +15,15 @@ export function renderTopbar(user) {
 
   return `
     <header class="topbar">
-      <div class="topbar-main">
+      <div class="topbar-left">
         <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Toggle Navigation Menu" aria-label="Toggle Navigation Menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <div class="topbar-left">
+        <div class="topbar-title-wrapper">
           <div class="topbar-title-row">
             <h1 class="topbar-title">Dashboard</h1>
             <span class="topbar-badge">Overview</span>
@@ -32,22 +32,25 @@ export function renderTopbar(user) {
         </div>
       </div>
 
-      <div class="topbar-actions">
-        <div class="topbar-theme-container">
+      <div class="topbar-right">
+        <div class="topbar-utility desktop-theme-picker">
           ${renderThemePicker()}
         </div>
-        <button class="btn btn-csv btn-sm" id="export-csv-btn" title="Download Expenses as CSV" aria-label="Export CSV">
-          <span class="btn-icon">📥</span>
-          <span class="btn-text">Export CSV</span>
-        </button>
-        <button class="btn btn-primary btn-sm" id="topbar-add-btn" title="Record New Expense" aria-label="Add Expense">
-          <span class="btn-icon">➕</span>
-          <span class="btn-text">Add Expense</span>
-        </button>
-        <button class="btn btn-secondary btn-sm btn-logout" id="logout-btn" title="Sign Out" aria-label="Logout">
-          <span class="btn-icon">🚪</span>
-          <span class="btn-text">Logout</span>
-        </button>
+
+        <div class="topbar-actions">
+          <button class="btn btn-csv btn-sm" id="export-csv-btn" title="Download Expenses as CSV">
+            <span class="btn-icon">📥</span>
+            <span class="btn-text">Export CSV</span>
+          </button>
+          <button class="btn btn-primary btn-sm" id="topbar-add-btn" title="Record New Expense">
+            <span class="btn-icon">➕</span>
+            <span class="btn-text">Add Expense</span>
+          </button>
+          <button class="btn btn-secondary btn-sm btn-logout" id="logout-btn" title="Sign Out">
+            <span class="btn-icon">🚪</span>
+            <span class="btn-text">Logout</span>
+          </button>
+        </div>
       </div>
     </header>
   `;
@@ -65,7 +68,10 @@ export function bindTopbarEvents({ onLogout, onAddExpense, onExportCsv } = {}) {
 
   const mobileBtn = document.getElementById('mobile-menu-btn');
   if (mobileBtn) {
-    mobileBtn.addEventListener('click', () => toggleMobileSidebar());
+    mobileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMobileSidebar();
+    });
   }
 
   const logoutBtn = document.getElementById('logout-btn');
@@ -83,3 +89,4 @@ export function bindTopbarEvents({ onLogout, onAddExpense, onExportCsv } = {}) {
     exportBtn.addEventListener('click', onExportCsv);
   }
 }
+

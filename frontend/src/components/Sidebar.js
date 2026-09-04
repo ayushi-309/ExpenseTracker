@@ -19,28 +19,34 @@ export function renderSidebar(user) {
       <div class="sidebar-brand">
         <div class="brand-icon"><img src="/favicon.svg" alt="Expense Tracker Logo" /></div>
         <div class="brand-text">Expense<span>Tracker</span></div>
-        <button class="sidebar-close-btn" id="sidebar-close-btn" title="Close Navigation Drawer">&times;</button>
+        <button class="sidebar-close-btn" id="sidebar-close-btn" title="Close Navigation Drawer" aria-label="Close Drawer">&times;</button>
       </div>
+
       <div class="sidebar-nav">
         <div class="sidebar-section-label">Main Menu</div>
-        <div class="nav-item active">
-          <span class="nav-icon">📊</span> Dashboard
+        <div class="nav-item active" id="nav-dash-btn">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
         </div>
         <div class="nav-item" id="nav-add-btn">
-          <span class="nav-icon">➕</span> Add Expense
+          <span class="nav-icon">➕</span>
+          <span class="nav-label">Add Expense</span>
         </div>
         <div class="nav-item" id="nav-budget-btn">
-          <span class="nav-icon">🎯</span> Set Budget Goal
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">Set Budget Goal</span>
         </div>
         <div class="nav-item" id="nav-csv-btn">
-          <span class="nav-icon">📥</span> Export CSV
+          <span class="nav-icon">📥</span>
+          <span class="nav-label">Export CSV</span>
         </div>
 
-        <div class="sidebar-section-label">Color Theme</div>
+        <div class="sidebar-section-label sidebar-theme-section-label">Color Themes</div>
         <div class="sidebar-theme-wrapper">
           ${renderThemePicker()}
         </div>
       </div>
+
       <div class="sidebar-footer">
         <div class="user-card">
           <div class="user-avatar">${initials}</div>
@@ -48,10 +54,10 @@ export function renderSidebar(user) {
             <div class="user-name">${escapeHtml(userName)}</div>
             <div class="user-email">${escapeHtml(userEmail)}</div>
           </div>
-          <button class="sidebar-logout-btn" id="sidebar-logout-btn" title="Sign Out" aria-label="Sign Out">
-            <span>🚪</span>
-          </button>
         </div>
+        <button class="sidebar-logout-btn" id="sidebar-logout-btn" title="Sign Out">
+          <span>🚪 Logout</span>
+        </button>
       </div>
     </aside>
   `;
@@ -66,7 +72,10 @@ export function renderSidebar(user) {
  * @param {Function} callbacks.onLogout
  */
 export function bindSidebarEvents({ onAddExpense, onSetBudget, onExportCsv, onLogout } = {}) {
-  bindThemePickerEvents();
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    bindThemePickerEvents(sidebar);
+  }
 
   const overlay = document.getElementById('sidebar-overlay');
   if (overlay) {
@@ -76,6 +85,14 @@ export function bindSidebarEvents({ onAddExpense, onSetBudget, onExportCsv, onLo
   const closeBtn = document.getElementById('sidebar-close-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => closeMobileSidebar());
+  }
+
+  const dashBtn = document.getElementById('nav-dash-btn');
+  if (dashBtn) {
+    dashBtn.addEventListener('click', () => {
+      closeMobileSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 
   const addBtn = document.getElementById('nav-add-btn');
@@ -109,6 +126,13 @@ export function bindSidebarEvents({ onAddExpense, onSetBudget, onExportCsv, onLo
       onLogout();
     });
   }
+
+  // Handle ESC key to close mobile sidebar
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMobileSidebar();
+    }
+  });
 }
 
 /**
@@ -119,6 +143,7 @@ export function closeMobileSidebar() {
   const overlay = document.getElementById('sidebar-overlay');
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('open');
+  document.body.classList.remove('sidebar-open');
 }
 
 /**
@@ -128,8 +153,10 @@ export function toggleMobileSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
   if (sidebar && overlay) {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
+    const willOpen = !sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', willOpen);
+    overlay.classList.toggle('open', willOpen);
+    document.body.classList.toggle('sidebar-open', willOpen);
   }
 }
 

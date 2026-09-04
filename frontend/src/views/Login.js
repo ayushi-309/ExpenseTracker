@@ -32,6 +32,12 @@ export function renderLogin(container, { onNavigate } = {}) {
           ${renderThemePicker()}
         </div>
         <div class="auth-form-container">
+          <div class="auth-brand-header">
+            <div class="auth-brand-icon">
+              <img src="/favicon.svg" alt="ExpenseTracker Logo" />
+            </div>
+            <div class="auth-brand-name">Expense<span>Tracker</span></div>
+          </div>
           <div class="form-header">
             <h2>Sign In</h2>
             <p>Welcome back! Sign in with your email or phone number.</p>

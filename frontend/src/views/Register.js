@@ -30,6 +30,12 @@ export function renderRegister(container, { onNavigate } = {}) {
           ${renderThemePicker()}
         </div>
         <div class="auth-form-container">
+          <div class="auth-brand-header">
+            <div class="auth-brand-icon">
+              <img src="/favicon.svg" alt="ExpenseTracker Logo" />
+            </div>
+            <div class="auth-brand-name">Expense<span>Tracker</span></div>
+          </div>
           <div class="form-header">
             <h2>Create Account</h2>
             <p>Start tracking and managing your expenses in seconds.</p>

@@ -16,37 +16,35 @@ export function renderTopbar(user) {
   return `
     <header class="topbar">
       <div class="topbar-main">
-        <div class="topbar-brand-section">
-          <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Toggle Navigation Menu" aria-label="Toggle Navigation Menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-          <div class="topbar-left">
-            <div class="topbar-title-row">
-              <h1 class="topbar-title">Dashboard</h1>
-              <span class="topbar-badge">Overview</span>
-            </div>
-            <p class="topbar-subtitle">Welcome back, <span class="user-highlight">${escapeHtml(userName)}</span></p>
+        <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Toggle Navigation Menu" aria-label="Toggle Navigation Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="topbar-left">
+          <div class="topbar-title-row">
+            <h1 class="topbar-title">Dashboard</h1>
+            <span class="topbar-badge">Overview</span>
           </div>
-        </div>
-        <div class="topbar-utility">
-          ${renderThemePicker()}
+          <p class="topbar-subtitle">Welcome back, <span class="user-highlight">${escapeHtml(userName)}</span></p>
         </div>
       </div>
 
       <div class="topbar-actions">
-        <button class="btn btn-csv btn-sm" id="export-csv-btn" title="Download Expenses as CSV">
+        <div class="topbar-theme-container">
+          ${renderThemePicker()}
+        </div>
+        <button class="btn btn-csv btn-sm" id="export-csv-btn" title="Download Expenses as CSV" aria-label="Export CSV">
           <span class="btn-icon">📥</span>
           <span class="btn-text">Export CSV</span>
         </button>
-        <button class="btn btn-primary btn-sm" id="topbar-add-btn" title="Record New Expense">
+        <button class="btn btn-primary btn-sm" id="topbar-add-btn" title="Record New Expense" aria-label="Add Expense">
           <span class="btn-icon">➕</span>
           <span class="btn-text">Add Expense</span>
         </button>
-        <button class="btn btn-secondary btn-sm btn-logout" id="logout-btn" title="Sign Out">
+        <button class="btn btn-secondary btn-sm btn-logout" id="logout-btn" title="Sign Out" aria-label="Logout">
           <span class="btn-icon">🚪</span>
           <span class="btn-text">Logout</span>
         </button>

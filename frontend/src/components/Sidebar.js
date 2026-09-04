@@ -2,6 +2,7 @@
  * Sidebar Component
  */
 import { escapeHtml, getInitials } from '../utils/helpers.js';
+import { renderThemePicker, bindThemePickerEvents } from './ThemePicker.js';
 
 /**
  * Renders sidebar navigation and user card HTML
@@ -34,6 +35,11 @@ export function renderSidebar(user) {
         <div class="nav-item" id="nav-csv-btn">
           <span class="nav-icon">📥</span> Export CSV
         </div>
+
+        <div class="sidebar-section-label">Color Theme</div>
+        <div class="sidebar-theme-wrapper">
+          ${renderThemePicker()}
+        </div>
       </div>
       <div class="sidebar-footer">
         <div class="user-card">
@@ -42,6 +48,9 @@ export function renderSidebar(user) {
             <div class="user-name">${escapeHtml(userName)}</div>
             <div class="user-email">${escapeHtml(userEmail)}</div>
           </div>
+          <button class="sidebar-logout-btn" id="sidebar-logout-btn" title="Sign Out" aria-label="Sign Out">
+            <span>🚪</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -54,8 +63,11 @@ export function renderSidebar(user) {
  * @param {Function} callbacks.onAddExpense
  * @param {Function} callbacks.onSetBudget
  * @param {Function} callbacks.onExportCsv
+ * @param {Function} callbacks.onLogout
  */
-export function bindSidebarEvents({ onAddExpense, onSetBudget, onExportCsv } = {}) {
+export function bindSidebarEvents({ onAddExpense, onSetBudget, onExportCsv, onLogout } = {}) {
+  bindThemePickerEvents();
+
   const overlay = document.getElementById('sidebar-overlay');
   if (overlay) {
     overlay.addEventListener('click', () => closeMobileSidebar());
@@ -89,6 +101,14 @@ export function bindSidebarEvents({ onAddExpense, onSetBudget, onExportCsv } = {
       onExportCsv();
     });
   }
+
+  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+  if (sidebarLogoutBtn && onLogout) {
+    sidebarLogoutBtn.addEventListener('click', () => {
+      closeMobileSidebar();
+      onLogout();
+    });
+  }
 }
 
 /**
@@ -112,3 +132,4 @@ export function toggleMobileSidebar() {
     overlay.classList.toggle('open');
   }
 }
+

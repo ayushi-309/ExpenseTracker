@@ -808,7 +808,15 @@ input, select, textarea, button { font-family: inherit; }
 .btn-sm { padding: 8px 16px; font-size: 0.82rem; }
 .btn-lg { padding: 15px 28px; font-size: 1rem; }
 .btn-block { width: 100%; }
-.btn-icon { width: 38px; height: 38px; padding: 0; border-radius: 8px; }
+.btn-icon-box { width: 38px; height: 38px; padding: 0; border-radius: 8px; }
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
 
 /* ═══════════════════════════════════════════
    DASHBOARD LAYOUT
@@ -874,6 +882,19 @@ input, select, textarea, button { font-family: inherit; }
   color: var(--text-muted);
   margin-bottom: 10px;
   margin-top: 24px;
+}
+.sidebar-theme-wrapper {
+  padding: 0 16px;
+  margin-top: 4px;
+}
+.sidebar-theme-wrapper .theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  width: 100%;
 }
 .nav-item {
   display: flex;
@@ -947,6 +968,27 @@ input, select, textarea, button { font-family: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.sidebar-logout-btn {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.sidebar-logout-btn:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: rgba(244, 63, 94, 0.3);
+}
 
 .main-content {
   background: var(--bg-primary);
@@ -959,7 +1001,7 @@ input, select, textarea, button { font-family: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 36px;
+  padding: 14px 32px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-glass);
   backdrop-filter: blur(16px);
@@ -973,14 +1015,13 @@ input, select, textarea, button { font-family: inherit; }
 .topbar-main {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
-.topbar-brand-section {
+.topbar-left {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
   min-width: 0;
 }
 
@@ -991,16 +1032,16 @@ input, select, textarea, button { font-family: inherit; }
 }
 
 .topbar-title {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.3px;
   color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
 }
 
 .topbar-badge {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -1013,12 +1054,12 @@ input, select, textarea, button { font-family: inherit; }
 
 .topbar-subtitle {
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 420px;
+  max-width: 320px;
 }
 
 .user-highlight {
@@ -1026,28 +1067,30 @@ input, select, textarea, button { font-family: inherit; }
   font-weight: 600;
 }
 
-.topbar-utility {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+.topbar-theme-container {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
 }
 
 .topbar-actions .btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
   font-size: 0.84rem;
   font-weight: 600;
   white-space: nowrap;
+  height: 38px;
+  box-sizing: border-box;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1716,10 +1759,10 @@ input, select, textarea, button { font-family: inherit; }
     display: flex !important;
   }
   .topbar {
-    padding: 14px 20px;
+    padding: 12px 18px;
   }
   .page-content {
-    padding: 24px 20px;
+    padding: 20px 16px;
   }
 }
 
@@ -1751,10 +1794,10 @@ input, select, textarea, button { font-family: inherit; }
 
   /* Dashboard Topbar */
   .topbar {
-    padding: 12px 16px;
+    padding: 10px 14px;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
   }
   .topbar-main {
     width: 100%;
@@ -1763,20 +1806,15 @@ input, select, textarea, button { font-family: inherit; }
     justify-content: space-between;
     gap: 8px;
   }
-  .topbar-brand-section {
-    flex: 1;
-    min-width: 0;
-  }
   .topbar-title {
     font-size: 1.15rem;
   }
   .topbar-subtitle {
     font-size: 0.76rem;
-    max-width: 180px;
+    max-width: 200px;
   }
-  .topbar-utility {
-    flex-shrink: 0;
-    max-width: 160px;
+  .topbar-theme-container {
+    display: none; /* Full theme picker is conveniently available in the sidebar drawer on mobile! */
   }
   .topbar-actions {
     width: 100%;
@@ -1786,62 +1824,78 @@ input, select, textarea, button { font-family: inherit; }
   }
   .topbar-actions #topbar-add-btn {
     flex: 2;
-    height: 42px;
-    font-size: 0.9rem;
+    height: 38px;
+    font-size: 0.88rem;
     font-weight: 700;
   }
   .topbar-actions #export-csv-btn {
     flex: 1;
-    height: 42px;
+    height: 38px;
     font-size: 0.82rem;
     padding: 6px 10px;
   }
   .topbar-actions #logout-btn {
-    height: 42px;
-    padding: 0 14px;
-    font-size: 0.82rem;
+    flex: 0 0 38px;
+    height: 38px;
+    padding: 0;
+  }
+  .topbar-actions #logout-btn .btn-text {
+    display: none;
   }
 
   /* Page Content & Budget Widget */
   .page-content {
-    padding: 16px 14px;
+    padding: 14px 12px;
   }
   .stats-row {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   .stat-card {
-    padding: 14px 16px;
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+  .stat-card .stat-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 1.05rem;
+  }
+  .stat-card .stat-label {
+    font-size: 0.7rem;
   }
   .stat-card .stat-value {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   .budget-widget-card {
-    padding: 16px;
-    border-radius: 14px;
-    margin-bottom: 18px;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
   }
   .budget-header {
     gap: 8px;
+    margin-bottom: 10px;
   }
   .budget-title {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     gap: 6px;
   }
   .budget-badge {
-    font-size: 0.72rem;
-    padding: 3px 8px;
+    font-size: 0.7rem;
+    padding: 2px 8px;
   }
   #edit-budget-btn {
     font-size: 0.78rem;
-    padding: 6px 12px;
+    padding: 5px 10px;
   }
   .budget-spent {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
   }
   .budget-spent-label {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+  }
+  .budget-limit {
+    font-size: 0.8rem;
   }
 
   /* Filters Bar */
@@ -1849,7 +1903,7 @@ input, select, textarea, button { font-family: inherit; }
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    padding: 14px 16px;
+    padding: 12px 14px;
   }
   .search-input {
     max-width: 100%;
@@ -1857,20 +1911,22 @@ input, select, textarea, button { font-family: inherit; }
   }
   .filters-selects-row {
     width: 100%;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
   .filters-selects-row .select-input {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
+    font-size: 0.78rem;
+    padding: 8px 10px;
   }
   .category-filters-container {
-    padding: 10px 16px;
+    padding: 8px 12px;
   }
   .filter-chip {
     flex-shrink: 0;
-    padding: 6px 14px;
-    font-size: 0.78rem;
+    padding: 5px 12px;
+    font-size: 0.76rem;
   }
 
   /* Mobile Card Layout for Expense Transactions */
@@ -1886,14 +1942,14 @@ input, select, textarea, button { font-family: inherit; }
     display: none;
   }
   .expense-table tbody tr {
-    padding: 14px 16px;
-    margin: 10px 12px;
+    padding: 12px 14px;
+    margin: 8px 8px;
     background: var(--bg-card-solid);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     position: relative;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
@@ -1911,24 +1967,24 @@ input, select, textarea, button { font-family: inherit; }
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding-right: 100px; /* Space for amount */
+    padding-right: 90px;
   }
   .expense-table .col-transaction .expense-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
   }
   .expense-table .col-transaction .expense-desc {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     color: var(--text-muted);
   }
   .expense-table .col-amount {
     position: absolute;
-    top: 14px;
-    right: 16px;
+    top: 12px;
+    right: 14px;
   }
   .expense-table .col-amount .expense-amount {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--danger);
   }
@@ -1943,54 +1999,54 @@ input, select, textarea, button { font-family: inherit; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 10px;
+    padding-top: 8px;
     margin-top: 4px;
     border-top: 1px solid var(--border-subtle);
   }
   .mobile-date-label {
     display: inline-block;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     font-weight: 500;
   }
   .expense-table .row-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     margin-left: auto;
   }
   .expense-table .row-actions .action-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    font-size: 1.05rem;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    font-size: 0.95rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
   }
 
   /* Modal Mobile Safe Styling */
   .modal-overlay {
-    padding: 10px;
+    padding: 8px;
     align-items: flex-end;
   }
   .modal {
-    max-height: 88vh;
+    max-height: 90vh;
     border-radius: 20px 20px 10px 10px;
     width: 100%;
   }
   .modal-header {
-    padding: 18px 20px;
+    padding: 16px 18px;
   }
   .modal-body {
-    padding: 18px 20px;
+    padding: 16px 18px;
   }
   .modal-footer {
-    padding: 14px 20px;
+    padding: 12px 18px;
     flex-direction: column-reverse;
     gap: 8px;
   }
   .modal-footer .btn {
     width: 100%;
-    height: 44px;
+    height: 42px;
   }
 }
 
@@ -1999,22 +2055,11 @@ input, select, textarea, button { font-family: inherit; }
   .topbar-subtitle {
     display: none;
   }
-  .topbar-utility {
-    max-width: 130px;
-  }
   .topbar-actions #export-csv-btn .btn-text {
     display: none;
   }
   .topbar-actions #export-csv-btn {
-    flex: 0 0 42px;
-    padding: 0;
-    justify-content: center;
-  }
-  .topbar-actions #logout-btn .btn-text {
-    display: none;
-  }
-  .topbar-actions #logout-btn {
-    flex: 0 0 42px;
+    flex: 0 0 38px;
     padding: 0;
     justify-content: center;
   }
@@ -2023,18 +2068,18 @@ input, select, textarea, button { font-family: inherit; }
     gap: 8px;
   }
   .stat-card {
-    padding: 12px 12px;
+    padding: 10px 10px;
   }
   .stat-card .stat-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
   }
   .stat-card .stat-label {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
   }
   .stat-card .stat-value {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
   }
 }
 
@@ -2044,7 +2089,11 @@ input, select, textarea, button { font-family: inherit; }
     grid-template-columns: 1fr;
   }
   .topbar-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  .filters-selects-row {
+    grid-template-columns: 1fr;
   }
 }
+
 

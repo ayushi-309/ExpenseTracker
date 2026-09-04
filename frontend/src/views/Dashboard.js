@@ -217,6 +217,7 @@ export function renderDashboard(container, { onNavigate } = {}) {
     onAddExpense: handleAddExpense,
     onSetBudget: handleSetBudget,
     onExportCsv: handleExportCsv,
+    onLogout: handleLogout,
   });
 
   bindTopbarEvents({
